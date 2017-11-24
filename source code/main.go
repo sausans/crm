@@ -1,7 +1,6 @@
 package main 
 
 import (
-	//"github.com/astaxie/beego"
 	"fmt"
 	"log"
 	_ "github.com/go-sql-driver/mysql"
@@ -12,11 +11,10 @@ import (
 	"net/http"
 )
 
+//KAMUS
+
 var db *sql.DB
-/*type App struct {
-	Router *mux.Router
-	DB     *sql.DB
-}*/
+
 type seproduct struct {
         name string `json: "name, omitempty"`
         promotion string `json: "promotion, omitempty"`
@@ -29,12 +27,17 @@ type user struct {
 }
 var people []user
 
+//FUNGSI 
+
 func GetUsers (w http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(w).Encode(people)
 }
 func Prods(w http.ResponseWriter, req *http.Request) {
-	PostTransaction(w,req)
-	CustomerPreferences(people[0])
+  var person user
+  people = removeUser(people,0)
+  PostTransaction(w,req)
+  person = people[0]
+  CustomerPreferences(person)
 }
 func PostTransaction(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
@@ -46,22 +49,30 @@ func PostTransaction(w http.ResponseWriter, req *http.Request) {
 }
 
 func CustomerPreferences(s user) {
-	var lala []*seproduct
-	lala = GetSelectedProduct(s.Productsbought)
-	 file, err := os.Create("pleasebitch.txt")
-    if err != nil {
-        log.Fatal("Cannot create file", err)
-    }
-    defer file.Close()
+   var lala []*seproduct
+   var i int
+   
+   lala = GetSelectedProduct(s.Productsbought)
+   file, err := os.Create("ayodong.txt")
+     if err != nil {
+         log.Fatal("Cannot create file", err)
+     }
+     defer file.Close()
 
-   // fmt.Fprintf(file, "Hello Readers of golangcode.com")
-	fmt.Fprintf(file, "Apakah pengguna %v tertarik membeli %v?", s.Username, lala[0].name)
+    fmt.Fprintf(file, "Apakah pengguna %v tertarik membeli:\n ", s.Username)
+      for i=0;i<len(lala);i++ {
+	     fmt.Fprintf(file, "%v dengan promosi %v\n",lala[i].name, lala[i].promotion)
+      }
 }
 
-//func removeUser (s []user, i int) []user {
-  //  s[i] = s[len(s)-1]
-    //return s[:len(s)-1]
-//}
+func removeUser (s []user, i int) []user {
+ if len(s) > 0 {
+   s[i] = s[len(s)-1]
+   return s[:len(s)-1]
+ } else {
+   return s
+ }
+}
 
 func GetSelectedProduct(kata string) (result []*seproduct) {
     var lala []*seproduct
@@ -96,9 +107,12 @@ func GetSelectedProduct(kata string) (result []*seproduct) {
     return lala
 }
 
+// MAIN FUNCTION
 func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/crm", GetUsers).Methods("GET")
 	router.HandleFunc("/crm/{username}", Prods).Methods("POST")
 	log.Fatal(http.ListenAndServe(":12345", router))
 }
+
+
