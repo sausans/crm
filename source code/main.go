@@ -1,14 +1,14 @@
 package main 
 
 import (
-	"fmt"
-	"log"
-	_ "github.com/go-sql-driver/mysql"
-	"database/sql"
-	"os"
-	"encoding/json"
-	"github.com/gorilla/mux"
-	"net/http"
+    "log"
+    _ "github.com/go-sql-driver/mysql"
+    "database/sql"
+    "encoding/json"
+    "github.com/gorilla/mux"
+    "net/http"
+    "net/smtp"
+    "strings"
 )
 
 //KAMUS
@@ -21,48 +21,49 @@ type seproduct struct {
 }
 
 type user struct {
-	Username string `json: "username, omitempty"`
-	Email string `json: "email, omitempty"`
-	Productsbought string `json: "productsbought, omitempty"`
+    Username string `json: "username, omitempty"`
+    Email string `json: "email, omitempty"`
+    Productsbought string `json: "productsbought, omitempty"`
 }
 var people []user
 
 //FUNGSI 
 
 func GetUsers (w http.ResponseWriter, req *http.Request) {
-	json.NewEncoder(w).Encode(people)
+    json.NewEncoder(w).Encode(people)
 }
 func Prods(w http.ResponseWriter, req *http.Request) {
   var person user
+  var mailbody string
   people = removeUser(people,0)
   PostTransaction(w,req)
   person = people[0]
-  CustomerPreferences(person)
-}
-func PostTransaction(w http.ResponseWriter, req *http.Request) {
-	params := mux.Vars(req)
-	var person user
-	_ = json.NewDecoder(req.Body).Decode(&person)
-	person.Username = params["username"]
-	people = append(people, person)
-	json.NewEncoder(w).Encode(people)
+  mailbody = CustomerPreferences(person)
+  send(mailbody, person.Email)
 }
 
-func CustomerPreferences(s user) {
+func PostTransaction(w http.ResponseWriter, req *http.Request) {
+    params := mux.Vars(req)
+    var person user
+    _ = json.NewDecoder(req.Body).Decode(&person)
+    person.Username = params["username"]
+    people = append(people, person)
+    json.NewEncoder(w).Encode(people)
+}
+
+func CustomerPreferences(s user) string {
    var lala []*seproduct
    var i int
    
    lala = GetSelectedProduct(s.Productsbought)
-   file, err := os.Create("ayodong.txt")
-     if err != nil {
-         log.Fatal("Cannot create file", err)
+  
+    output := strings.Join([]string{"Apakah", "pengguna", s.Username, "tertarik","membeli", s.Productsbought,":"}, " ")
+    for i=0;i<len(lala);i++ {
+          output1 := strings.Join([]string{lala[i].name, "dengan", "promosi", lala[i].promotion, ","}, " ")
+          output = strings.Join([]string{output, output1},"\n")
      }
-     defer file.Close()
 
-    fmt.Fprintf(file, "Apakah pengguna %v tertarik membeli:\n ", s.Username)
-      for i=0;i<len(lala);i++ {
-	     fmt.Fprintf(file, "%v dengan promosi %v\n",lala[i].name, lala[i].promotion)
-      }
+    return output
 }
 
 func removeUser (s []user, i int) []user {
@@ -107,12 +108,30 @@ func GetSelectedProduct(kata string) (result []*seproduct) {
     return lala
 }
 
-// MAIN FUNCTION
-func main() {
-	router := mux.NewRouter()
-	router.HandleFunc("/crm", GetUsers).Methods("GET")
-	router.HandleFunc("/crm/{username}", Prods).Methods("POST")
-	log.Fatal(http.ListenAndServe(":12345", router))
+func send(body string, to string) {
+  from := "crmprogif@gmail.com"
+  password := "barcelona8"
+
+  msg := "From: " + from + "\r\n" +
+    "To: " + to + "\r\n" +
+    "MIME-Version: 1.0" + " \r\n" +
+    "Content-type: text/html" + "\r\n" +
+    "Subject: Your messages subject" + "\r\n\r\n" +
+    body + "\r\n"
+
+  err := smtp.SendMail("smtp.gmail.com:587", smtp.PlainAuth("", from, password, "smtp.gmail.com"), from, []string{to}, []byte(msg))
+  if err != nil {
+    log.Printf("Error: %s", err)
+    return
+  }
+
+  log.Print("message sent")
 }
 
-
+// MAIN FUNCTION
+func main() {
+    router := mux.NewRouter()
+    router.HandleFunc("/crm", GetUsers).Methods("GET")
+    router.HandleFunc("/crm/{username}", Prods).Methods("POST")
+    log.Fatal(http.ListenAndServe(":12345", router))
+}
