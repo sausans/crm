@@ -50,7 +50,7 @@ func CustomerPreferences(s user) string {
     for i=0;i<len(lala);i++ {
     	output1 := strings.Join([]string{lala[i].name, "dengan", "promosi", lala[i].promotion, ","}, " ")
         if i==len(lala)-1  {
-          output2 := strings.Join([]string{,lala[i].name, "dengan", "promosi", lala[i].promotion}, " ")
+          output2 := strings.Join([]string{lala[i].name, "dengan", "promosi", lala[i].promotion}, " ")
           output = strings.Join([]string{output, output2},"\n")
         } else {
            output = strings.Join([]string{output, output1},"\n")
