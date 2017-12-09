@@ -10,4 +10,6 @@ type user struct {
     Username string `json: "username, omitempty"`
     Email string `json: "email, omitempty"`
     Productsbought string `json: "productsbought, omitempty"`
+    Productsname string `json: "productsname, omitempty"`
 }
+
