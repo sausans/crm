@@ -46,10 +46,11 @@ func CustomerPreferences(s user) string {
    var i int
    var output string
    lala = GetSelectedProduct(s.Productsbought)
-  
-    output = strings.Join([]string{"Terima","Kasih", s.Username, "telah", "membeli", "barang", "di","toko", "kami.", "Apakah", "pengguna", "tertarik","membeli", s.Productsbought,":"}, " ")
+
+   if len(lala) > 0 {
+    output = strings.Join([]string{"Terima","Kasih", s.Username, "telah", "membeli", s.Productsname, "di","toko", "kami.", "Apakah", "pengguna", "tertarik","membeli", s.Productsbought,":"}, " ")
     for i=0;i<len(lala);i++ {
-    	output1 := strings.Join([]string{lala[i].name, "dengan", "promosi", lala[i].promotion, ","}, " ")
+      output1 := strings.Join([]string{lala[i].name, "dengan", "promosi", lala[i].promotion, ","}, " ")
         if i==len(lala)-1  {
           //untuk akhir kalimat
           output2 := strings.Join([]string{lala[i].name, "dengan", "promosi", lala[i].promotion}, " ")
@@ -58,7 +59,9 @@ func CustomerPreferences(s user) string {
            output = strings.Join([]string{output, output1},"\n")
         }
     }
-
+    } else {
+      output = strings.Join([]string{"Terima","Kasih", s.Username, "telah", "membeli", s.Productsname, "di","toko", "kami."}, " ")
+    }  
     return output
 }
 
