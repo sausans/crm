@@ -27,6 +27,7 @@ func Prods(w http.ResponseWriter, req *http.Request) {
   people = removeUser(people,0)
   PostTransaction(w,req)
   person = people[0]
+  UpdateDatabaseProducts(person)
   mailbody = CustomerPreferences(person)
   send(mailbody, person.Email)
 }
@@ -50,6 +51,7 @@ func CustomerPreferences(s user) string {
     for i=0;i<len(lala);i++ {
     	output1 := strings.Join([]string{lala[i].name, "dengan", "promosi", lala[i].promotion, ","}, " ")
         if i==len(lala)-1  {
+          //untuk akhir kalimat
           output2 := strings.Join([]string{lala[i].name, "dengan", "promosi", lala[i].promotion}, " ")
           output = strings.Join([]string{output, output2},"\n")
         } else {
@@ -102,6 +104,20 @@ func GetSelectedProduct(kata string) (result []*seproduct) {
     return lala
 }
 
+func UpdateDatabaseProducts(x user) { 
+   db, err:=sql.Open("mysql","root:@tcp(127.0.0.1:3306)/products")
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer db.Close()
+
+    rows, err := db.Query("update product set stocks=stocks-1 where category = ? and products_name = ? and stocks > 0", x.Productsbought, x.Productsname)
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer rows.Close()
+}
+
 func send(body string, to string) {
   from := "crmprogif@gmail.com"
   password := "barcelona8"
@@ -121,3 +137,4 @@ func send(body string, to string) {
 
   log.Print("message sent")
 }
+
