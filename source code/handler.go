@@ -78,7 +78,7 @@ func GetSelectedProduct(kata string) (result []*seproduct) {
     var lala []*seproduct
     var a,b string 
     //var i int
-    db, err:=sql.Open("mysql","root:@tcp(127.0.0.1:3306)/products")
+    db, err:=sql.Open("mysql","root:@tcp(167.205.67.251:3306)/productsausan")
     if err != nil {
         log.Fatal(err)
     }
@@ -108,7 +108,7 @@ func GetSelectedProduct(kata string) (result []*seproduct) {
 }
 
 func UpdateDatabaseProducts(x user) { 
-   db, err:=sql.Open("mysql","root:@tcp(127.0.0.1:3306)/products")
+   db, err:=sql.Open("mysql","root:@tcp(167.205.67.251:3306)/productsausan")
     if err != nil {
         log.Fatal(err)
     }
