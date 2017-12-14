@@ -8,7 +8,6 @@ import (
     "net/http"
     "net/smtp"
     "strings"
-    "github.com/gorilla/mux"
 )
 
 //KAMUS
@@ -33,10 +32,8 @@ func Prods(w http.ResponseWriter, req *http.Request) {
 }
 
 func PostTransaction(w http.ResponseWriter, req *http.Request) {
-    params := mux.Vars(req)
     var person user
     _ = json.NewDecoder(req.Body).Decode(&person)
-    person.Username = params["username"]
     people = append(people, person)
     json.NewEncoder(w).Encode(people)
 }
@@ -140,4 +137,5 @@ func send(body string, to string) {
 
   log.Print("message sent")
 }
+
 

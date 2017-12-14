@@ -10,6 +10,7 @@ import (
 func main() {
     router := mux.NewRouter()
     router.HandleFunc("/crm", GetUsers).Methods("GET")
-    router.HandleFunc("/crm/{username}", Prods).Methods("POST")
+    router.HandleFunc("/UPDATELIST", Prods).Methods("POST")
     log.Fatal(http.ListenAndServe(":12345", router))
 }
+
